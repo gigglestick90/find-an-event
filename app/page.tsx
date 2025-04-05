@@ -1,103 +1,168 @@
-import Image from "next/image";
+// app/page.tsx
+"use client"; // Make the page a client component for hooks and map interaction
 
-export default function Home() {
+import dynamic from 'next/dynamic';
+import { useEffect, useMemo, useState } from 'react';
+import { allLocations, LocationData } from '@/data/locations';
+import { useAppStore } from '@/lib/store';
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import LocationCard from '@/components/location/LocationCard';
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { MapIcon, ListIcon } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Dynamically import the MapDisplay component
+const MapDisplay = dynamic(() => import('@/components/map/MapDisplay'), {
+  ssr: false,
+  loading: () => <Skeleton className="h-full w-full" />
+});
+
+export default function HomePage() {
+  // State for view toggle
+  const [currentView, setCurrentView] = useState<'map' | 'list'>('map');
+  // State for detail dialog
+  const [selectedLocationDetail, setSelectedLocationDetail] = useState<LocationData | null>(null);
+
+  // Get state from store
+  const selectedCategory = useAppStore((state) => state.selectedCategory);
+  const attendedEventIds = useAppStore((state) => state.attendedEventIds);
+
+  // Initialize attended events from localStorage on mount
+  useEffect(() => {
+    useAppStore.getState().initializeAttended();
+  }, []);
+
+  // Filter locations for the LIST view (only by category)
+  const locationsForList = useMemo(() => {
+    if (selectedCategory === "All") {
+      return allLocations;
+    }
+    return allLocations.filter((loc) => loc.category === selectedCategory);
+  }, [selectedCategory]);
+
+  // Filter locations for the MAP view (category AND not attended)
+  const locationsForMap = useMemo(() => {
+    return locationsForList.filter(loc => !attendedEventIds.includes(loc.id));
+  }, [locationsForList, attendedEventIds]); // Depends on list and attended IDs
+
+  // Memoize map component using the map-specific list
+  const mapComponent = useMemo(() => <MapDisplay locations={locationsForMap} />, [locationsForMap]);
+
+  // --- Handlers ---
+  const handleShowDetails = (location: LocationData) => {
+    setSelectedLocationDetail(location);
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedLocationDetail(null);
+  };
+
+  const handleViewChange = (value: string) => {
+    if (value === 'map' || value === 'list') {
+      setCurrentView(value);
+    }
+  };
+
+  // --- Render Logic ---
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="flex flex-col h-full w-full">
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      {/* View Toggle */}
+      <div className="p-2 border-b flex justify-center">
+        <ToggleGroup
+          type="single"
+          value={currentView}
+          onValueChange={handleViewChange}
+          aria-label="View toggle"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <ToggleGroupItem value="map" aria-label="Map view">
+            <MapIcon className="h-4 w-4 mr-2" /> Map
+          </ToggleGroupItem>
+          <ToggleGroupItem value="list" aria-label="List view">
+            <ListIcon className="h-4 w-4 mr-2" /> List
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
+
+      {/* Content Area (Map or List) */}
+      <div className="flex-grow overflow-hidden">
+        {currentView === 'map' ? (
+          <div className="h-full w-full">
+            {mapComponent} {/* Map uses locationsForMap */}
+          </div>
+        ) : (
+          <ScrollArea className="h-full w-full p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {locationsForList.length > 0 ? (
+                 // List uses locationsForList
+                locationsForList.map(location => (
+                  <LocationCard
+                    key={location.id}
+                    location={location}
+                    onShowDetails={() => handleShowDetails(location)}
+                    // LocationCard itself will handle its attended state styling
+                  />
+                ))
+              ) : (
+                <p className="col-span-full text-center text-muted-foreground">
+                  No locations found{selectedCategory !== 'All' ? ` for "${selectedCategory}"` : ''}.
+                </p>
+              )}
+            </div>
+          </ScrollArea>
+        )}
+      </div>
+
+      {/* Detail Dialog */}
+      <Dialog
+        open={selectedLocationDetail !== null}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            handleCloseDetails();
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          {selectedLocationDetail && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selectedLocationDetail?.name}</DialogTitle>
+                <DialogDescription>
+                  {selectedLocationDetail?.neighborhood
+                    ? `${selectedLocationDetail?.category} - ${selectedLocationDetail?.neighborhood}`
+                    : selectedLocationDetail?.category}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
+                <p className="text-sm text-muted-foreground">
+                  {selectedLocationDetail?.description || "No description available."}
+                </p>
+                <p className="text-sm mt-2">
+                  Coordinates: {selectedLocationDetail?.coordinates?.lat?.toFixed(5)}, {selectedLocationDetail?.coordinates?.lng?.toFixed(5)}
+                </p>
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant="secondary">
+                    Close
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
