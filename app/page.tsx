@@ -95,7 +95,7 @@ export default function HomePage() {
       </div>
 
       {/* Content Area (Map or List) */}
-      <div className="flex-grow overflow-hidden">
+      <div className="flex-grow"> {/* Removed overflow-hidden */}
         {currentView === 'map' ? (
           <div className="h-full w-full">
             {mapComponent} {/* Map uses locationsForMap */}

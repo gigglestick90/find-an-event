@@ -34,11 +34,11 @@ export default function RootLayout({
           direction="horizontal"
           className="min-h-screen max-w-full rounded-lg border" // Basic styling
         >
-          <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+          <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="hidden md:block"> {/* Hide on mobile */}
             {/* Sidebar Area */}
             <Sidebar /> {/* Use the Sidebar component */}
           </ResizablePanel>
-          <ResizableHandle withHandle />
+          <ResizableHandle withHandle className="hidden md:flex" /> {/* Hide on mobile */}
           <ResizablePanel defaultSize={80} className="flex flex-col"> {/* Add flex-col to panel */}
             {/* Main Content Area - Pages render directly in the panel */}
             {/* Padding etc. should be handled by the page component (app/page.tsx) */}
