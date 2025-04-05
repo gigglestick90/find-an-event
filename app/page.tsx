@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
 import { allLocations, LocationData } from '@/data/locations';
 import { useAppStore } from '@/lib/store';
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"; // Keep for Map/List toggle
 import LocationCard from '@/components/location/LocationCard';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MapIcon, ListIcon } from 'lucide-react';
@@ -18,7 +18,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"; // Keep for Dialog, add for filters
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Dynamically import the MapDisplay component
@@ -53,10 +53,19 @@ export default function HomePage() {
   // Filter locations for the MAP view (category AND not attended)
   const locationsForMap = useMemo(() => {
     return locationsForList.filter(loc => !attendedEventIds.includes(loc.id));
-  }, [locationsForList, attendedEventIds]); // Depends on list and attended IDs
+  }, [locationsForList, attendedEventIds]);
 
   // Memoize map component using the map-specific list
   const mapComponent = useMemo(() => <MapDisplay locations={locationsForMap} />, [locationsForMap]);
+
+  // --- Get Unique Categories for Mobile Filters ---
+  const categories = useMemo(() => {
+    const uniqueCategories = new Set(allLocations.map(loc => loc.category));
+    return ["All", ...Array.from(uniqueCategories)];
+  }, []);
+
+  // Get action from store
+  const setSelectedCategory = useAppStore((state) => state.setSelectedCategory);
 
   // --- Handlers ---
   const handleShowDetails = (location: LocationData) => {
@@ -94,6 +103,21 @@ export default function HomePage() {
         </ToggleGroup>
       </div>
 
+      {/* Mobile Category Filters (Hidden on md and up) */}
+      <div className="p-2 border-b flex justify-center flex-wrap gap-2 md:hidden">
+        {categories.map(category => (
+          <Button
+            key={category}
+            variant={selectedCategory === category ? "default" : "outline"}
+            size="sm" // Smaller buttons for mobile
+            className="rounded-full h-8 w-auto px-3" // More circular/pill shape
+            onClick={() => setSelectedCategory(category as any)} // Cast needed due to string union type
+          >
+            {category}
+          </Button>
+        ))}
+      </div>
+
       {/* Content Area (Map or List) */}
       <div className="flex-grow"> {/* Removed overflow-hidden */}
         {currentView === 'map' ? (
@@ -102,7 +126,8 @@ export default function HomePage() {
           </div>
         ) : (
           <ScrollArea className="h-full w-full p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Use flex for centering on mobile, grid for larger screens */}
+            <div className="flex flex-col items-center gap-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:items-stretch">
               {locationsForList.length > 0 ? (
                  // List uses locationsForList
                 locationsForList.map(location => (
