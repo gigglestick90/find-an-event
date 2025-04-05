@@ -5,10 +5,8 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
 import L from 'leaflet'; // Import Leaflet library
 
-// Import icon assets directly
-import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
-import iconUrl from 'leaflet/dist/images/marker-icon.png';
-import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
+// Icon paths are now relative to the 'public' directory
+// No need to import them directly
 
 // --- FIX START ---
 // Fix Leaflet's default icon path issue with build tools like Webpack/Next.js
@@ -18,9 +16,9 @@ import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 
 L.Icon.Default.mergeOptions({
-    iconRetinaUrl: iconRetinaUrl, // Use direct import without .src
-    iconUrl: iconUrl,             // Use direct import without .src
-    shadowUrl: shadowUrl,         // Use direct import without .src
+    iconRetinaUrl: '/images/marker-icon-2x.png', // Path relative to public folder
+    iconUrl: '/images/marker-icon.png',         // Path relative to public folder
+    shadowUrl: '/images/marker-shadow.png',     // Path relative to public folder
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
