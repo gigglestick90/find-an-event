@@ -17,7 +17,6 @@ export const allLocations: LocationData[] = [
   { id: 'r1', name: 'Kaya', category: 'Restaurant', coordinates: { lat: 40.4519, lng: -79.9836 }, neighborhood: 'Strip District', description: 'Caribbean-inspired cuisine.' },
   { id: 'r2', name: 'Morcilla', category: 'Restaurant', coordinates: { lat: 40.4652, lng: -79.9529 }, neighborhood: 'Lawrenceville', description: 'Spanish tapas and small plates.' },
   { id: 'r3', name: 'Apteka', category: 'Restaurant', coordinates: { lat: 40.4637, lng: -79.9473 }, neighborhood: 'Bloomfield', description: 'Central & Eastern European vegan.' },
-  { id: 'r4', name: 'Primanti Bros.', category: 'Restaurant', coordinates: { lat: 40.4507, lng: -79.9856 }, neighborhood: 'Strip District', description: 'Classic Pittsburgh sandwiches.' },
   { id: 'r5', name: 'Pamela\'s Diner', category: 'Restaurant', coordinates: { lat: 40.4524, lng: -79.9823 }, neighborhood: 'Strip District', description: 'Famous for breakfast crepe-hotcakes.' },
   { id: 'r6', name: 'Meat & Potatoes', category: 'Restaurant', coordinates: { lat: 40.4428, lng: -79.9981 }, neighborhood: 'Downtown', description: 'Gastropub focusing on meat dishes.' },
   { id: 'r7', name: 'Gaucho Parrilla Argentina', category: 'Restaurant', coordinates: { lat: 40.4424, lng: -79.9989 }, neighborhood: 'Downtown', description: 'Argentinean wood-fired grill.' },
@@ -28,16 +27,13 @@ export const allLocations: LocationData[] = [
   { id: 'r12', name: 'The Parlor Dim Sum', category: 'Restaurant', coordinates: { lat: 40.4664, lng: -79.9611 }, neighborhood: 'Lawrenceville', description: 'Cantonese dim sum with inventive cocktails.' },
   { id: 'r13', name: 'Yaba\'s', category: 'Restaurant', coordinates: { lat: 40.4445, lng: -79.9868 }, neighborhood: 'Uptown', description: 'Mediterranean and Middle Eastern cuisine with homemade recipes.' },
   { id: 'r14', name: 'Grand Concourse', category: 'Restaurant', coordinates: { lat: 40.4336, lng: -80.0039 }, neighborhood: 'Station Square', description: 'Seafood restaurant in a historic train station with stunning architecture.' },
-  { id: 'r15', name: 'Monterey Bay Fish Grotto', category: 'Restaurant', coordinates: { lat: 40.4395, lng: -80.0198 }, neighborhood: 'Mt. Washington', description: 'Seafood dining with panoramic views of the city.' },
   { id: 'r16', name: 'Balvanera', category: 'Restaurant', coordinates: { lat: 40.4502, lng: -79.9898 }, neighborhood: 'Strip District', description: 'Argentinian cuisine featuring small plates and homemade sausages.' }, // Note: Neighborhood updated based on address
   { id: 'r17', name: 'Casbah', category: 'Restaurant', coordinates: { lat: 40.4524, lng: -79.9342 }, neighborhood: 'Shadyside', description: 'Mediterranean-inspired cuisine with seasonal menu.' },
   { id: 'r18', name: 'Eleven', category: 'Restaurant', coordinates: { lat: 40.4523, lng: -79.9846 }, neighborhood: 'Strip District', description: 'Upscale fine dining with contemporary American cuisine.' },
   { id: 'r19', name: 'Altius', category: 'Restaurant', coordinates: { lat: 40.4382, lng: -80.0210 }, neighborhood: 'Mt. Washington', description: 'Modern American cuisine with spectacular city views.' },
-  { id: 'r20', name: 'Penn Avenue Fish Co.', category: 'Restaurant', coordinates: { lat: 40.4513, lng: -79.9840 }, neighborhood: 'Strip District', description: 'Fresh seafood market and restaurant with creative sushi rolls.' },
 
   // HIKING
   { id: 'h1', name: 'Frick Park Trailhead (Forbes & Braddock)', category: 'Hiking', coordinates: { lat: 40.4387, lng: -79.9019 }, description: 'Large city park with extensive trails.' },
-  { id: 'h2', name: 'Schenley Park Visitor Center', category: 'Hiking', coordinates: { lat: 40.4390, lng: -79.9453 }, description: 'Trails, Phipps Conservatory nearby.' },
   { id: 'h3', name: 'Three Rivers Heritage Trail (North Shore)', category: 'Hiking', coordinates: { lat: 40.4464, lng: -80.0041 }, description: 'Paved riverfront trail access near PNC Park.' },
   { id: 'h4', name: 'Point State Park', category: 'Hiking', coordinates: { lat: 40.4417, lng: -80.0084 }, description: 'Historic park at the confluence.' }, // Note: Also GAP Terminus
   { id: 'h5', name: 'Riverview Park', category: 'Hiking', coordinates: { lat: 40.4812, lng: -80.0110 }, description: 'Wooded trails and observatory (Observatory area coords).' },
@@ -76,14 +72,10 @@ export const allLocations: LocationData[] = [
   { id: 'm4', name: 'Heinz History Center', category: 'Museum', coordinates: { lat: 40.4466, lng: -79.9923 }, neighborhood: 'Strip District', description: 'Smithsonian-affiliated museum showcasing Western Pennsylvania history.' },
   { id: 'm5', name: 'Mattress Factory', category: 'Museum', coordinates: { lat: 40.4573, lng: -80.0100 }, neighborhood: 'North Side', description: 'Contemporary art museum specializing in site-specific installations.' },
   { id: 'm6', name: 'Phipps Conservatory and Botanical Gardens', category: 'Museum', coordinates: { lat: 40.4389, lng: -79.9481 }, neighborhood: 'Oakland', description: 'Historic glass conservatory with seasonal flower shows and gardens.' },
-  { id: 'm7', name: 'Children\'s Museum of Pittsburgh', category: 'Museum', coordinates: { lat: 40.4520, lng: -80.0026 }, neighborhood: 'North Side', description: 'Interactive museum with hands-on exhibits for children.' },
   { id: 'm8', name: 'Carnegie Science Center', category: 'Museum', coordinates: { lat: 40.4465, lng: -80.0182 }, neighborhood: 'North Shore', description: 'Interactive science museum with planetarium and submarine.' },
   { id: 'm9', name: 'Moonshot Museum', category: 'Museum', coordinates: { lat: 40.4561, lng: -80.0125 }, neighborhood: 'North Side', description: 'Space-themed museum featuring spacecraft assembly and lunar mission simulations.' },
   { id: 'm10', name: 'The Frick Pittsburgh', category: 'Museum', coordinates: { lat: 40.4419, lng: -79.9017 }, neighborhood: 'Point Breeze', description: 'Art collection, historic home, and car museum on a 5.5-acre estate.' },
-  { id: 'm11', name: 'Bicycle Heaven Museum', category: 'Museum', coordinates: { lat: 40.4574, lng: -80.0238 }, neighborhood: 'North Side', description: 'World\'s largest bicycle museum and shop with over 6,000 bikes.' },
-  { id: 'm12', name: 'Soldiers & Sailors Memorial Hall & Museum', category: 'Museum', coordinates: { lat: 40.4455, lng: -79.9529 }, neighborhood: 'Oakland', description: 'Military museum honoring veterans of all branches of service.' },
   { id: 'm13', name: 'Fort Pitt Museum', category: 'Museum', coordinates: { lat: 40.4412, lng: -80.0108 }, neighborhood: 'Point State Park', description: 'Historical museum focused on Western PA\'s role in the French and Indian War and American Revolution.' },
-  { id: 'm14', name: 'Randyland', category: 'Museum', coordinates: { lat: 40.4572, lng: -80.0095 }, neighborhood: 'North Side', description: 'Colorful outdoor art museum created from found objects by local artist Randy Gilson.' },
   { id: 'm15', name: 'Roberto Clemente Museum', category: 'Museum', coordinates: { lat: 40.4712, lng: -79.9615 }, neighborhood: 'Lawrenceville', description: 'Museum dedicated to the Pirates baseball legend in a restored firehouse.' },
 
   // SPORTS VENUES
@@ -100,7 +92,6 @@ export const allLocations: LocationData[] = [
   { id: 'sh4', name: 'Shadyside Shopping District', category: 'Shopping', coordinates: { lat: 40.4518, lng: -79.9344 }, neighborhood: 'Shadyside', description: 'Upscale shopping area with boutiques, galleries, and restaurants along Walnut Street.' },
   { id: 'sh5', name: 'South Side Works', category: 'Shopping', coordinates: { lat: 40.4289, lng: -79.9721 }, neighborhood: 'South Side', description: 'Riverside shopping and entertainment complex with stores, restaurants, and a cinema.' }, // Updated coords
   { id: 'sh6', name: 'Station Square', category: 'Shopping', coordinates: { lat: 40.4335, lng: -80.0035 }, neighborhood: 'South Shore', description: '52-acre riverfront complex with restaurants, shopping, and entertainment.' }, // Updated coords
-  { id: 'sh7', name: 'Ross Park Mall', category: 'Shopping', coordinates: { lat: 40.5466, lng: -80.0102 }, neighborhood: 'Ross Township', description: 'Upscale shopping mall with over 150 retailers including luxury brands.' },
 
   // PARKS
   { id: 'p1', name: 'Point State Park', category: 'Park', coordinates: { lat: 40.4417, lng: -80.0084 }, neighborhood: 'Downtown', description: 'Historic park at the confluence of the three rivers with a 150-foot fountain.' },
@@ -113,9 +104,6 @@ export const allLocations: LocationData[] = [
   { id: 'p8', name: 'South Park', category: 'Park', coordinates: { lat: 40.3006, lng: -79.9979 }, neighborhood: 'South Park Township', description: '2,013-acre park with wave pool, golf course, and ice rink.' },
 
   // ENTERTAINMENT
-  { id: 'e1', name: 'Benedum Center for the Performing Arts', category: 'Entertainment', coordinates: { lat: 40.4438, lng: -79.9976 }, neighborhood: 'Cultural District', description: 'Historic theater hosting Broadway shows, opera, and ballet.' },
-  { id: 'e2', name: 'Heinz Hall for the Performing Arts', category: 'Entertainment', coordinates: { lat: 40.4433, lng: -79.9982 }, neighborhood: 'Cultural District', description: 'Home of the Pittsburgh Symphony Orchestra and live performances.' },
-  { id: 'e3', name: 'August Wilson African American Cultural Center', category: 'Entertainment', coordinates: { lat: 40.4412, lng: -79.9970 }, neighborhood: 'Cultural District', description: 'Cultural center showcasing performing and visual arts by African Americans.' },
   { id: 'e4', name: 'Pittsburgh Public Theater', category: 'Entertainment', coordinates: { lat: 40.4425, lng: -79.9987 }, neighborhood: 'Cultural District', description: 'Professional theater company in the O\'Reilly Theater.' },
   { id: 'e5', name: 'Kelly Strayhorn Theater', category: 'Entertainment', coordinates: { lat: 40.4653, lng: -79.9293 }, neighborhood: 'East Liberty', description: 'Community performing arts theater with diverse programming.' },
   { id: 'e6', name: 'Duquesne Incline', category: 'Entertainment', coordinates: { lat: 40.4386, lng: -80.0185 }, neighborhood: 'Mt. Washington', description: 'Historic cable car offering panoramic views of the Pittsburgh skyline.' },
