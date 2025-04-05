@@ -3,7 +3,7 @@
 
 import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
-import { allLocations, LocationData } from '@/data/locations';
+import { allLocations, LocationData } from '@/data/locations'; // Import LocationData interface
 import { useAppStore } from '@/lib/store';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"; // Keep for Map/List toggle
 import LocationCard from '@/components/location/LocationCard';
@@ -26,6 +26,9 @@ const MapDisplay = dynamic(() => import('@/components/map/MapDisplay'), {
   ssr: false,
   loading: () => <Skeleton className="h-full w-full" />
 });
+
+// Define the Category type based on LocationData plus 'All'
+type Category = LocationData['category'] | 'All';
 
 export default function HomePage() {
   // State for view toggle
@@ -111,7 +114,7 @@ export default function HomePage() {
             variant={selectedCategory === category ? "default" : "outline"}
             size="sm" // Smaller buttons for mobile
             className="rounded-full h-8 w-auto px-3" // More circular/pill shape
-            onClick={() => setSelectedCategory(category as any)} // Cast needed due to string union type
+            onClick={() => setSelectedCategory(category as Category)} // Cast to the specific Category type
           >
             {category}
           </Button>
