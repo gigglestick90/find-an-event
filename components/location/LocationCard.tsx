@@ -11,17 +11,53 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LocationData } from "@/data/locations";
 import { useAppStore } from "@/lib/store";
-import React, { useState } from "react"; // Import useState only
-import { Navigation } from 'lucide-react'; // Import the Navigation icon
+import React, { useState } from "react";
+import { Navigation, Star } from 'lucide-react'; // Import Navigation and Star icons
 import { cn } from "@/lib/utils"; // Import the cn utility
 import { createClient } from '@/utils/supabase/client'; // Import Supabase client
-
 // Define props for the component
 interface LocationCardProps {
   location: LocationData;
   onShowDetails: () => void;
   className?: string; // Add optional className prop
 }
+
+// Custom star rating component
+const StarRating = ({ rating }: { rating: number }) => {
+  // Calculate full and partial stars
+  const fullStars = Math.floor(rating);
+  const partialStar = rating % 1;
+  const emptyStars = 5 - fullStars - (partialStar > 0 ? 1 : 0);
+
+  return (
+    <div className="flex items-center">
+      <div className="flex">
+        {/* Full stars */}
+        {[...Array(fullStars)].map((_, i) => (
+          <Star key={`full-${i}`} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+        ))}
+        
+        {/* Partial star */}
+        {partialStar > 0 && (
+          <div className="relative w-4 h-4">
+            {/* Empty star as background */}
+            <Star className="w-4 h-4 text-gray-300 absolute top-0 left-0" />
+            {/* Filled star with clip-path for partial fill */}
+            <div style={{ width: `${partialStar * 100}%`, overflow: 'hidden' }} className="absolute top-0 left-0 h-4">
+              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+            </div>
+          </div>
+        )}
+        
+        {/* Empty stars */}
+        {[...Array(emptyStars)].map((_, i) => (
+          <Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />
+        ))}
+      </div>
+      <span className="ml-2 text-xs text-muted-foreground">{rating.toFixed(1)}</span>
+    </div>
+  );
+};
 
 // The LocationCard component
 export default function LocationCard({ location, onShowDetails, className }: LocationCardProps) { // Destructure className
@@ -30,7 +66,6 @@ export default function LocationCard({ location, onShowDetails, className }: Loc
   const toggleAttendedEvent = useAppStore((state) => state.toggleAttendedEvent); // Now async
   const user = useAppStore((state) => state.user); // Get user state to potentially disable button if not logged in
   const [loading, setLoading] = useState(false); // Add loading state for the button
-
   // Check if the current location is marked as attended
   const isAttended = attendedEventIds.includes(location.id);
 
@@ -82,6 +117,7 @@ export default function LocationCard({ location, onShowDetails, className }: Loc
     }
   };
 
+
   return (
     <Card
       // Apply conditional styling for attended events using cn
@@ -106,8 +142,15 @@ export default function LocationCard({ location, onShowDetails, className }: Loc
             {location.description || "No description available."}
           </p>
         </CardContent>
+        {/* Moved Rating Section - Placed after content, before footer */}
+        {typeof location.googleRating === 'number' && (
+          <div className="px-6 pb-4 pt-2"> {/* Add padding */}
+            <StarRating rating={location.googleRating} />
+          </div>
+        )}
       </div>
-      <CardFooter className="flex justify-between items-center pt-4 border-t mt-auto gap-2"> {/* Added gap-2 */}
+      {/* Footer now only contains badge and buttons */}
+      <CardFooter className="flex justify-between items-center pt-4 border-t mt-auto gap-2">
         <Badge variant="outline">{location.category}</Badge>
         <div className="flex items-center gap-2"> {/* Group buttons */}
           {/* Maps button with stopPropagation */}

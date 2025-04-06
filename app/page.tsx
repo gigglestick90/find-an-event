@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react';
 import { allLocations, LocationData } from '@/data/locations'; // Import LocationData interface
 import { useAppStore } from '@/lib/store';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"; // Keep for Map/List toggle
-import LocationCard from '@/components/location/LocationCard';
+// Static import removed - will be dynamically imported
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MapIcon, ListIcon } from 'lucide-react';
 import {
@@ -27,6 +27,11 @@ const MapDisplay = dynamic(() => import('@/components/map/MapDisplay'), {
   loading: () => <Skeleton className="h-full w-full" />
 });
 
+// Dynamically import the LocationCard component to prevent SSR issues with rater-js
+const LocationCard = dynamic(() => import('@/components/location/LocationCard'), {
+  ssr: false,
+  loading: () => <Skeleton className="w-[300px] h-[200px] shadow-md rounded-lg" /> // Basic skeleton matching card size
+});
 // Define the Category type based on LocationData plus 'All'
 type Category = LocationData['category'] | 'All';
 
