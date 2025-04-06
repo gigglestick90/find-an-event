@@ -15,7 +15,10 @@ import { type User } from '@supabase/supabase-js'; // Keep User type
     }
 
     // Simple Sidebar component
-    export default function Sidebar({ user }: SidebarProps) {
+    export default function Sidebar({
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      user
+    }: SidebarProps) {
       // We're keeping the user-related code for future use but not using it currently
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const storeUser = useAppStore(state => state.user);

@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LocationData } from "@/data/locations";
 import { useAppStore } from "@/lib/store";
-import React, { useState, useEffect } from "react"; // Import useState and useEffect
+import React, { useState } from "react"; // Import useState only
 import { Navigation } from 'lucide-react'; // Import the Navigation icon
 import { cn } from "@/lib/utils"; // Import the cn utility
 import { createClient } from '@/utils/supabase/client'; // Import Supabase client
