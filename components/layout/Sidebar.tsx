@@ -16,10 +16,10 @@ import { type User } from '@supabase/supabase-js'; // Keep User type
 
     // Simple Sidebar component
     export default function Sidebar({ user }: SidebarProps) {
-      // Get user from store to ensure it's always up-to-date
+      // We're keeping the user-related code for future use but not using it currently
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const storeUser = useAppStore(state => state.user);
-      // Use the store user if available, otherwise fall back to the prop
-      const currentUser = storeUser || user;
+      // No need to create currentUser variable since we're not using it
       
       // Get category state from store
       const selectedCategory = useAppStore((state) => state.selectedCategory);

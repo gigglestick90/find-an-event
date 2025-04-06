@@ -107,8 +107,29 @@ export const useAppStore = create<AppState>((set, get) => {
 
       if (!user) {
         console.warn("User must be logged in to toggle attended events.");
-        // Optionally: trigger a login prompt or redirect
-        return; 
+        
+        // Check if we're in a browser environment before showing alert
+        if (typeof window !== 'undefined') {
+          alert("Please log in to mark events as attended.");
+        }
+        
+        // Re-check authentication state from Supabase directly
+        try {
+          const { data } = await supabase.auth.getSession();
+          if (data.session?.user) {
+            // If we have a valid session but store doesn't have user,
+            // update the store with the current user
+            console.log("Found valid session but store user state was null. Updating...");
+            await get().setUserAndProfile(data.session.user);
+            
+            // Try again with the updated user state
+            return get().toggleAttendedEvent(id);
+          }
+        } catch (sessionError) {
+          console.error("Error checking session:", sessionError);
+        }
+        
+        return;
       }
 
       const isAttended = currentIds.includes(id);
@@ -116,10 +137,10 @@ export const useAppStore = create<AppState>((set, get) => {
         ? currentIds.filter((eventId) => eventId !== id)
         : [...currentIds, id];
 
-      // 1. Optimistically update local state for better UX (optional)
-      // set({ attendedEventIds: newIds }); 
+      // Optimistically update local state for better UX
+      set({ attendedEventIds: newIds });
 
-      // 2. Update the database
+      // Update the database
       console.log(`Updating profile for user ${user.id} with attended IDs:`, newIds);
       try {
           const { error } = await supabase
@@ -129,23 +150,42 @@ export const useAppStore = create<AppState>((set, get) => {
 
           if (error) {
             console.error('Error updating attended events in DB:', error);
-            // Optional: Revert optimistic update if it failed
-            // set({ attendedEventIds: currentIds }); 
-            // Optional: Show error to user
-            alert(`Error saving attendance: ${error.message}`);
-            return; // Stop if DB update failed
+            // Revert optimistic update if it failed
+            set({ attendedEventIds: currentIds });
+            
+            // Check for auth errors specifically
+            if (error.code === 'PGRST301' || error.message.includes('JWT')) {
+              console.warn("Authentication error detected. Refreshing session...");
+              // Try to refresh the session
+              const { data: refreshData } = await supabase.auth.refreshSession();
+              if (refreshData.session) {
+                console.log("Session refreshed successfully. Retrying operation...");
+                // Try the operation again with the refreshed session
+                return get().toggleAttendedEvent(id);
+              } else {
+                if (typeof window !== 'undefined') {
+                  alert("Your session has expired. Please log in again.");
+                }
+              }
+            } else {
+              // For other errors, show the message
+              if (typeof window !== 'undefined') {
+                alert(`Error saving attendance: ${error.message}`);
+              }
+            }
+            return;
           }
 
-          // 3. If DB update succeeds, *ensure* local state matches
-          // (If not doing optimistic update, set state here)
           console.log("Successfully updated attended events in DB.");
-          set({ attendedEventIds: newIds }); 
+          // State is already updated from optimistic update
 
       } catch (error) {
            console.error('Unexpected error updating profile:', error);
-           // Optional: Revert optimistic update
-           // set({ attendedEventIds: currentIds }); 
-           alert(`An unexpected error occurred while saving attendance.`);
+           // Revert optimistic update
+           set({ attendedEventIds: currentIds });
+           if (typeof window !== 'undefined') {
+             alert(`An unexpected error occurred while saving attendance.`);
+           }
       }
     },
   };

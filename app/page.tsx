@@ -39,7 +39,7 @@ export default function HomePage() {
   // Get state from store - auth state is now managed centrally
   const selectedCategory = useAppStore((state) => state.selectedCategory);
   const attendedEventIds = useAppStore((state) => state.attendedEventIds);
-  const user = useAppStore((state) => state.user);
+  // Remove unused user variable since we don't need it in this component
 
   // Filter locations for the LIST view (only by category)
   const locationsForList = useMemo(() => {

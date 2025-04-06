@@ -3,7 +3,7 @@
 import React from 'react'; // Remove unused imports
 import { Button } from "@/components/ui/button";
 import { type User } from '@supabase/supabase-js'; // Keep User type
-import { createClient } from '@/utils/supabase/client'; // Need client-side Supabase client
+// Remove unused createClient import as auth is now handled by the store
 import Link from 'next/link';
 import { signout } from '@/app/auth/signout/actions'; // Keep signout action
 import { useAppStore } from '@/lib/store'; // Add store import

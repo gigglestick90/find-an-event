@@ -11,9 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LocationData } from "@/data/locations";
 import { useAppStore } from "@/lib/store";
-import React, { useState } from "react"; // Import useState
+import React, { useState, useEffect } from "react"; // Import useState and useEffect
 import { Navigation } from 'lucide-react'; // Import the Navigation icon
 import { cn } from "@/lib/utils"; // Import the cn utility
+import { createClient } from '@/utils/supabase/client'; // Import Supabase client
 
 // Define props for the component
 interface LocationCardProps {
@@ -33,29 +34,49 @@ export default function LocationCard({ location, onShowDetails, className }: Loc
   // Check if the current location is marked as attended
   const isAttended = attendedEventIds.includes(location.id);
 
-  // Handler for the attend button click
-  // Make the handler async
+  // Enhanced handler for the attend button click with better error handling
   const handleAttendClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     // IMPORTANT: Prevent the Card's onClick from firing
-    // Use both stopPropagation and preventDefault for maximum isolation
     e.stopPropagation();
-    e.preventDefault();
-
+    
     // Log to verify the handler is being called
     console.log("Mark attended button clicked for:", location.name);
-
+    
+    // Check if we have a user in the store
     if (!user) {
-      // Optionally redirect to login or show a message if user isn't logged in
-      alert("Please log in to mark events as attended.");
-      return;
+      console.warn("User not found in store when attempting to mark attendance");
+      
+      // Try to get the Supabase client to check auth status directly
+      try {
+        const supabase = createClient();
+        const { data } = await supabase.auth.getSession();
+        
+        if (data.session?.user) {
+          console.log("Found valid session but store user state was null");
+          // We have a valid session but the store doesn't have the user
+          // This indicates a synchronization issue between server and client state
+          
+          // Continue with the toggle operation - the store's toggleAttendedEvent
+          // function will handle re-checking auth and updating the store
+        } else {
+          // No valid session found
+          alert("Please log in to mark events as attended.");
+          return;
+        }
+      } catch (authError) {
+        console.error("Error checking authentication:", authError);
+        alert("There was a problem verifying your login status. Please try refreshing the page.");
+        return;
+      }
     }
 
     setLoading(true); // Set loading state
     try {
       await toggleAttendedEvent(location.id); // Await the async action
+      // The toggleAttendedEvent function now handles all error cases internally
     } catch (error) {
-      // Error handling is mostly done in the store, but you could add component-specific feedback here
       console.error("Error toggling attended event from card:", error);
+      alert("There was a problem saving your attendance. Please try again.");
     } finally {
       setLoading(false); // Reset loading state regardless of success/failure
     }
@@ -103,23 +124,15 @@ export default function LocationCard({ location, onShowDetails, className }: Loc
             </a>
           </Button>
           
-          {/* Wrap the Attend button in a div that stops propagation */}
-          <div
-            onClick={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
-            className="inline-block"
-          >
+          {/* Simplified wrapper for the Attend button */}
+          <div onClick={(e) => e.stopPropagation()} className="inline-block">
             <Button
               variant={isAttended ? "secondary" : "outline"}
               size="sm"
               onClick={handleAttendClick}
-              // Make the button a separate tabbable element
-              tabIndex={0}
               aria-label={isAttended ? `Mark ${location.name} as not attended` : `Mark ${location.name} as attended`}
-              disabled={loading || !user} // Disable button while loading OR if user is not logged in
-              title={!user ? "Log in to mark attendance" : undefined} // Add tooltip if disabled due to no user
-              // Add more specific styling to ensure it's treated as a separate element
-              className="relative z-10"
+              disabled={loading} // Only disable button while loading, not based on user state
+              title={!user ? "Log in to mark attendance" : undefined} // Keep tooltip for user information
             >
               {loading ? "Saving..." : (isAttended ? "Attended ✓" : "Mark Attended")}
             </Button>

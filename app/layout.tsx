@@ -41,8 +41,8 @@ export default async function RootLayout({
           // geistMono.variable // Removed mono font for now unless needed
         )}
       >
-        {/* Initialize store at the app root level */}
-        <StoreInitializer />
+        {/* Initialize store at the app root level with server user data */}
+        <StoreInitializer serverUser={user} />
         {/* Pass user prop to Header */}
         <Header user={user} />
 
