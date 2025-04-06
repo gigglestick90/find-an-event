@@ -5,9 +5,9 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
 import L from 'leaflet'; // Import Leaflet library
 
+import { Navigation } from 'lucide-react'; // Import the Navigation icon
 // Icon paths are now relative to the 'public' directory
 // No need to import them directly
-
 // --- FIX START ---
 // Fix Leaflet's default icon path issue with build tools like Webpack/Next.js
 // See: https://github.com/PaulLeCam/react-leaflet/issues/453#issuecomment-410450387
@@ -65,6 +65,15 @@ export default function MapDisplay({ locations }: MapDisplayProps) {
                         <b>{location.name}</b><br />
                         Category: {location.category}<br />
                         {location.description && <>{location.description}<br /></>}
+                        <a
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(location.name + ", Pittsburgh, PA")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-2 inline-flex items-center gap-1 text-sm text-blue-600 hover:underline"
+                        >
+                            <Navigation className="h-4 w-4" />
+                            Get Directions
+                        </a>
                     </Popup>
                 </Marker>
             ))}

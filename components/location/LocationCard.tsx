@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { LocationData } from "@/data/locations";
 import { useAppStore } from "@/lib/store";
 import React from "react";
+import { Navigation } from 'lucide-react'; // Import the Navigation icon
 import { cn } from "@/lib/utils"; // Import the cn utility
 
 // Define props for the component
@@ -58,18 +59,32 @@ export default function LocationCard({ location, onShowDetails }: LocationCardPr
           </p>
         </CardContent>
       </div>
-      <CardFooter className="flex justify-between items-center pt-4 border-t mt-auto">
+      <CardFooter className="flex justify-between items-center pt-4 border-t mt-auto gap-2"> {/* Added gap-2 */}
         <Badge variant="outline">{location.category}</Badge>
-        <Button
-          variant={isAttended ? "secondary" : "outline"}
-          size="sm"
-          onClick={handleAttendClick}
-          aria-label={isAttended ? `Mark ${location.name} as not attended` : `Mark ${location.name} as attended`}
-          // Optionally disable the button slightly if attended, though toggling might still be desired
-          // className={cn(isAttended && "opacity-80")}
-        >
-          {isAttended ? "Attended ✓" : "Mark Attended"}
-        </Button>
+        <div className="flex items-center gap-2"> {/* Group buttons */}
+          <Button variant="ghost" size="icon" asChild onClick={(e) => e.stopPropagation()}>
+            <a
+              // Use URL encoding for the location name and add city context
+              href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(location.name + ", Pittsburgh, PA")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Get directions to ${location.name}`}
+              title="Get Directions" // Tooltip text
+            >
+              <Navigation className="h-4 w-4" />
+            </a>
+          </Button>
+          <Button
+            variant={isAttended ? "secondary" : "outline"}
+            size="sm"
+            onClick={handleAttendClick}
+            aria-label={isAttended ? `Mark ${location.name} as not attended` : `Mark ${location.name} as attended`}
+            // Optionally disable the button slightly if attended, though toggling might still be desired
+            // className={cn(isAttended && "opacity-80")}
+          >
+            {isAttended ? "Attended ✓" : "Mark Attended"}
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );
