@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LocationData } from "@/data/locations";
 import { useAppStore } from "@/lib/store";
-import React from "react";
+import React, { useState } from "react"; // Import useState
 import { Navigation } from 'lucide-react'; // Import the Navigation icon
 import { cn } from "@/lib/utils"; // Import the cn utility
 
@@ -19,29 +19,50 @@ import { cn } from "@/lib/utils"; // Import the cn utility
 interface LocationCardProps {
   location: LocationData;
   onShowDetails: () => void;
+  className?: string; // Add optional className prop
 }
 
 // The LocationCard component
-export default function LocationCard({ location, onShowDetails }: LocationCardProps) {
+export default function LocationCard({ location, onShowDetails, className }: LocationCardProps) { // Destructure className
   // Get state and actions from the Zustand store
   const attendedEventIds = useAppStore((state) => state.attendedEventIds);
-  const toggleAttendedEvent = useAppStore((state) => state.toggleAttendedEvent);
+  const toggleAttendedEvent = useAppStore((state) => state.toggleAttendedEvent); // Now async
+  const user = useAppStore((state) => state.user); // Get user state to potentially disable button if not logged in
+  const [loading, setLoading] = useState(false); // Add loading state for the button
 
   // Check if the current location is marked as attended
   const isAttended = attendedEventIds.includes(location.id);
 
   // Handler for the attend button click
-  const handleAttendClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  // Make the handler async
+  const handleAttendClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation(); // IMPORTANT: Prevent the Card's onClick from firing
-    toggleAttendedEvent(location.id);
+
+    if (!user) {
+      // Optionally redirect to login or show a message if user isn't logged in
+      alert("Please log in to mark events as attended.");
+      return;
+    }
+
+    setLoading(true); // Set loading state
+    try {
+      await toggleAttendedEvent(location.id); // Await the async action
+    } catch (error) {
+      // Error handling is mostly done in the store, but you could add component-specific feedback here
+      console.error("Error toggling attended event from card:", error);
+    } finally {
+      setLoading(false); // Reset loading state regardless of success/failure
+    }
   };
 
   return (
     <Card
       // Apply conditional styling for attended events using cn
+      // Merge incoming className with existing classes
       className={cn(
         "w-[300px] shadow-md hover:shadow-lg transition-shadow cursor-pointer flex flex-col justify-between h-full",
-        isAttended && "opacity-60 bg-muted/50" // Apply reduced opacity and slight grey background if attended
+        isAttended && "opacity-60 bg-muted/50", // Apply reduced opacity and slight grey background if attended
+        className // Apply the passed className
       )}
       onClick={onShowDetails}
       aria-live="polite" // Announce changes for screen readers
@@ -79,10 +100,10 @@ export default function LocationCard({ location, onShowDetails }: LocationCardPr
             size="sm"
             onClick={handleAttendClick}
             aria-label={isAttended ? `Mark ${location.name} as not attended` : `Mark ${location.name} as attended`}
-            // Optionally disable the button slightly if attended, though toggling might still be desired
-            // className={cn(isAttended && "opacity-80")}
+            disabled={loading || !user} // Disable button while loading OR if user is not logged in
+            title={!user ? "Log in to mark attendance" : undefined} // Add tooltip if disabled due to no user
           >
-            {isAttended ? "Attended ✓" : "Mark Attended"}
+            {loading ? "Saving..." : (isAttended ? "Attended ✓" : "Mark Attended")}
           </Button>
         </div>
       </CardFooter>

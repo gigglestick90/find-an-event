@@ -1,84 +1,142 @@
-// lib/store.ts
 import { create } from 'zustand';
+import { createClient } from '@/utils/supabase/client'; // Import Supabase client-side utility
+import { type User } from '@supabase/supabase-js'; // Import User type
 
 // Define the categories type plus 'All'
 export type Category = 'All' | 'Restaurant' | 'Hiking' | 'Games' | 'Museum' | 'Sports' | 'Shopping' | 'Park' | 'Entertainment';
 
 // Define the combined state structure and actions
 interface AppState {
-  // Existing filter state
+  // Filter state
   selectedCategory: Category;
   setSelectedCategory: (category: Category) => void;
 
-  // New state for attended events
-  attendedEventIds: string[];
-  initializeAttended: () => void; // Action to load from localStorage
-  toggleAttendedEvent: (id: string) => void; // Action to add/remove event ID
+  // Auth & Profile state
+  user: User | null; // Store the logged-in Supabase user object
+  attendedEventIds: string[]; // Store attended IDs from the user's profile
+  loadingProfile: boolean; // Flag to indicate profile loading state
+  
+  // Actions
+  initializeAuthListener: () => () => void; // Renamed: Sets up Supabase auth listener, returns unsubscribe function
+  setUserAndProfile: (user: User | null) => Promise<void>; // Fetches profile and sets state
+  toggleAttendedEvent: (id: string) => Promise<void>; // Now async to handle DB update
 }
 
-// Key for localStorage
-const ATTENDED_EVENTS_STORAGE_KEY = 'attendedEvents';
-
 // Create the Zustand store
-// Rename the hook for clarity as it now manages more than just filters
-export const useAppStore = create<AppState>((set, get) => ({
-  // --- Existing Filter State ---
-  selectedCategory: 'All',
-  setSelectedCategory: (category: Category) => set({ selectedCategory: category }),
+export const useAppStore = create<AppState>((set, get) => {
+  // Create a single Supabase client instance for the store's lifecycle
+  const supabase = createClient(); 
 
-  // --- New Attended Events State & Actions ---
-  attendedEventIds: [], // Initial state (empty until initialized)
+  return {
+    // --- Filter State ---
+    selectedCategory: 'All',
+    setSelectedCategory: (category: Category) => set({ selectedCategory: category }),
 
-  initializeAttended: () => {
-    // Ensure this runs only on the client-side
-    if (typeof window !== 'undefined') {
-      const storedIds = localStorage.getItem(ATTENDED_EVENTS_STORAGE_KEY);
-      let initialIds: string[] = []; // Default to empty array
+    // --- Auth & Profile State ---
+    user: null, // Initial user state
+    attendedEventIds: [], // Initial attended events
+    loadingProfile: true, // Start in loading state
 
-      if (storedIds) {
-        try {
-          const parsedIds = JSON.parse(storedIds);
-          // Basic validation: check if it's an array of strings
-          if (Array.isArray(parsedIds) && parsedIds.every((item: unknown): item is string => typeof item === 'string')) {
-             initialIds = parsedIds;
-          } else {
-             console.error("Invalid data found in localStorage for attended events. Expected an array of strings. Clearing.");
-             localStorage.removeItem(ATTENDED_EVENTS_STORAGE_KEY); // Clear invalid data
-          }
-        } catch (error) {
-          console.error("Failed to parse attended events from localStorage. Clearing.", error);
-          localStorage.removeItem(ATTENDED_EVENTS_STORAGE_KEY); // Clear corrupted data
+    // --- Actions ---
+    initializeAuthListener: () => {
+      console.log("Setting up Supabase auth listener...");
+      const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+        console.log("Auth state changed:", event, session?.user?.id);
+        const currentUser = session?.user ?? null;
+        // Call setUserAndProfile whenever auth state changes
+        await get().setUserAndProfile(currentUser); 
+      });
+
+      // Return the unsubscribe function
+      return () => {
+        console.log("Unsubscribing Supabase auth listener.");
+        authListener?.subscription.unsubscribe();
+      };
+    },
+
+    setUserAndProfile: async (user: User | null) => {
+        set({ user: user, loadingProfile: true }); // Set user immediately, start loading profile
+        if (user) {
+            console.log("Fetching profile for user:", user.id);
+            try {
+                const { data, error, status } = await supabase
+                    .from('profiles')
+                    .select(`attended_event_ids`)
+                    .eq('id', user.id)
+                    .single();
+
+                if (error && status !== 406) { // 406 means no row found, which is okay initially
+                    console.error('Error fetching profile:', error);
+                    set({ attendedEventIds: [], loadingProfile: false }); // Reset on error
+                } else if (data) {
+                    console.log("Profile data fetched:", data);
+                    // Ensure data.attended_event_ids is an array, default to empty if null/undefined
+                    const attendedIds = Array.isArray(data.attended_event_ids) ? data.attended_event_ids : [];
+                    set({ attendedEventIds: attendedIds, loadingProfile: false });
+                } else {
+                     console.log("No profile found for user, using empty attended list.");
+                     set({ attendedEventIds: [], loadingProfile: false }); // No profile yet, use empty array
+                }
+            } catch (error) {
+                console.error('Unexpected error fetching profile:', error);
+                set({ attendedEventIds: [], loadingProfile: false }); // Reset on unexpected error
+            }
+        } else {
+            console.log("User logged out, clearing attended events.");
+            set({ attendedEventIds: [], loadingProfile: false }); // Clear attended events if user logs out
         }
+    },
+
+    toggleAttendedEvent: async (id: string) => {
+      const user = get().user;
+      const currentIds = get().attendedEventIds;
+
+      if (!user) {
+        console.warn("User must be logged in to toggle attended events.");
+        // Optionally: trigger a login prompt or redirect
+        return; 
       }
-      // Set the state after processing localStorage
-      set({ attendedEventIds: initialIds });
-    }
-  },
 
-  toggleAttendedEvent: (id: string) => {
-    const currentIds = get().attendedEventIds;
-    const isAttended = currentIds.includes(id);
-    let newIds: string[];
+      const isAttended = currentIds.includes(id);
+      const newIds = isAttended
+        ? currentIds.filter((eventId) => eventId !== id)
+        : [...currentIds, id];
 
-    if (isAttended) {
-      // Remove the id
-      newIds = currentIds.filter((eventId: string) => eventId !== id);
-    } else {
-      // Add the id
-      newIds = [...currentIds, id];
-    }
+      // 1. Optimistically update local state for better UX (optional)
+      // set({ attendedEventIds: newIds }); 
 
-    // Update state
-    set({ attendedEventIds: newIds });
+      // 2. Update the database
+      console.log(`Updating profile for user ${user.id} with attended IDs:`, newIds);
+      try {
+          const { error } = await supabase
+            .from('profiles')
+            .update({ attended_event_ids: newIds, updated_at: new Date().toISOString() })
+            .eq('id', user.id);
 
-    // Update localStorage (only on client)
-    if (typeof window !== 'undefined') {
-       try {
-         localStorage.setItem(ATTENDED_EVENTS_STORAGE_KEY, JSON.stringify(newIds));
-       } catch (error) {
-         console.error("Failed to save attended events to localStorage:", error);
-         // Potentially notify user or implement fallback
-       }
-    }
-  },
-}));
+          if (error) {
+            console.error('Error updating attended events in DB:', error);
+            // Optional: Revert optimistic update if it failed
+            // set({ attendedEventIds: currentIds }); 
+            // Optional: Show error to user
+            alert(`Error saving attendance: ${error.message}`);
+            return; // Stop if DB update failed
+          }
+
+          // 3. If DB update succeeds, *ensure* local state matches
+          // (If not doing optimistic update, set state here)
+          console.log("Successfully updated attended events in DB.");
+          set({ attendedEventIds: newIds }); 
+
+      } catch (error) {
+           console.error('Unexpected error updating profile:', error);
+           // Optional: Revert optimistic update
+           // set({ attendedEventIds: currentIds }); 
+           alert(`An unexpected error occurred while saving attendance.`);
+      }
+    },
+  };
+});
+
+// Note: The initialization (`initializeAuthListener`) needs to be called 
+// from a client component, typically in a top-level layout or provider,
+// using useEffect.
