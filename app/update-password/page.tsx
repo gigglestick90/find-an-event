@@ -87,7 +87,7 @@ export default function UpdatePasswordPage() {
     return () => {
       authListener?.subscription.unsubscribe()
     }
-  }, [supabase, router, isSessionReady]) // searchParams handled by hook
+  }, [supabase, router, isSessionReady, searchParams]) // Add searchParams back as it's used in the effect
 
   const handleUpdatePassword = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -95,7 +95,7 @@ export default function UpdatePasswordPage() {
     setMessage(null) // Clear previous messages
 
     const formData = new FormData(event.currentTarget)
-    const result = await updatePassword(formData) // Call server action
+    await updatePassword(formData); // Call server action, no need to store result
 
     // Server action redirects on success/error, but we might want to handle client-side messages too
     // The redirect will update searchParams, triggering the useEffect to display the message.

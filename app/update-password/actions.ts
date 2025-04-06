@@ -43,9 +43,10 @@ export async function updatePassword(formData: FormData) {
 
     // Password updated successfully, redirect to login with a success message
     return redirect('/login?message=Password updated successfully. Please log in.')
-  } catch (error: any) { // Type error as any to check digest
+  } catch (error: unknown) { // Catch as unknown first
     // Check if the error is the internal redirect signal by checking its digest
-    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+    // Type assertion needed to access digest safely after checking existence
+    if (typeof error === 'object' && error !== null && 'digest' in error && typeof error.digest === 'string' && error.digest.startsWith('NEXT_REDIRECT')) {
       throw error; // Re-throw the redirect signal
     }
     // Handle other unexpected errors
