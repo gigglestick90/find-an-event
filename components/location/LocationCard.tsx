@@ -36,7 +36,13 @@ export default function LocationCard({ location, onShowDetails, className }: Loc
   // Handler for the attend button click
   // Make the handler async
   const handleAttendClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation(); // IMPORTANT: Prevent the Card's onClick from firing
+    // IMPORTANT: Prevent the Card's onClick from firing
+    // Use both stopPropagation and preventDefault for maximum isolation
+    e.stopPropagation();
+    e.preventDefault();
+
+    // Log to verify the handler is being called
+    console.log("Mark attended button clicked for:", location.name);
 
     if (!user) {
       // Optionally redirect to login or show a message if user isn't logged in
@@ -60,14 +66,22 @@ export default function LocationCard({ location, onShowDetails, className }: Loc
       // Apply conditional styling for attended events using cn
       // Merge incoming className with existing classes
       className={cn(
-        "w-[300px] shadow-md hover:shadow-lg transition-shadow cursor-pointer flex flex-col justify-between h-full",
+        "w-[300px] shadow-md hover:shadow-lg transition-shadow flex flex-col justify-between h-full",
         isAttended && "opacity-60 bg-muted/50", // Apply reduced opacity and slight grey background if attended
         className // Apply the passed className
       )}
-      onClick={onShowDetails}
+      // Remove onClick from the Card itself
       aria-live="polite" // Announce changes for screen readers
     >
-      <div> {/* Wrap Header and Content */}
+      {/* Clickable area for card details */}
+      <div
+        className="cursor-pointer flex-1"
+        onClick={onShowDetails}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === 'Enter' && onShowDetails()}
+        aria-label={`Show details for ${location.name}`}
+      >
         <CardHeader>
           <CardTitle>{location.name}</CardTitle>
           <CardDescription>
@@ -80,28 +94,39 @@ export default function LocationCard({ location, onShowDetails, className }: Loc
           </p>
         </CardContent>
       </div>
-      <CardFooter className="flex justify-between items-center pt-4 border-t mt-auto gap-2"> {/* Added gap-2 */}
+      {/* Non-clickable footer with buttons */}
+      <CardFooter className="flex justify-between items-center pt-4 border-t mt-auto gap-2 pointer-events-auto">
         <Badge variant="outline">{location.category}</Badge>
-        <div className="flex items-center gap-2"> {/* Group buttons */}
-          <Button variant="ghost" size="icon" asChild onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-2 card-footer-buttons">
+          {/* Maps button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            asChild
+          >
             <a
-              // Use URL encoding for the location name and add city context
               href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(location.name + ", Pittsburgh, PA")}`}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Get directions to ${location.name}`}
-              title="Get Directions" // Tooltip text
+              title="Get Directions"
+              onClick={(e) => e.stopPropagation()} // Stop propagation here
             >
               <Navigation className="h-4 w-4" />
             </a>
           </Button>
+          
+          {/* Attend button - completely separate from card click */}
           <Button
             variant={isAttended ? "secondary" : "outline"}
             size="sm"
             onClick={handleAttendClick}
+            tabIndex={0}
             aria-label={isAttended ? `Mark ${location.name} as not attended` : `Mark ${location.name} as attended`}
-            disabled={loading || !user} // Disable button while loading OR if user is not logged in
-            title={!user ? "Log in to mark attendance" : undefined} // Add tooltip if disabled due to no user
+            disabled={loading || !user}
+            title={!user ? "Log in to mark attendance" : undefined}
+            // Make button more prominent and clearly separate
+            className="font-medium relative z-50 hover:z-50 focus:z-50"
           >
             {loading ? "Saving..." : (isAttended ? "Attended ✓" : "Mark Attended")}
           </Button>

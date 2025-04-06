@@ -7,8 +7,8 @@ import Sidebar from "@/components/layout/Sidebar"; // Import Sidebar
 import Header from "@/components/layout/Header"; // Import Header
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
-// import StoreInitializer from '@/components/layout/StoreInitializer'; // Remove initializer import
-import { createClient } from '@/utils/supabase/server'; // Re-add server client import
+import StoreInitializer from '@/components/layout/StoreInitializer'; // Import StoreInitializer
+import { createClient } from '@/utils/supabase/server'; // Server client import
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,10 +41,9 @@ export default async function RootLayout({
           // geistMono.variable // Removed mono font for now unless needed
         )}
       >
-        {/* Remove store initializer component */}
-        {/* <StoreInitializer /> */}
-        {/* Add Header - Pass user data */}
-        {/* Pass user prop back to Header */}
+        {/* Initialize store at the app root level */}
+        <StoreInitializer />
+        {/* Pass user prop to Header */}
         <Header user={user} />
 
         {/* Resizable Layout - Let it grow to fill space */}

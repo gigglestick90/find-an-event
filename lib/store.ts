@@ -40,11 +40,25 @@ export const useAppStore = create<AppState>((set, get) => {
     // --- Actions ---
     initializeAuthListener: () => {
       console.log("Setting up Supabase auth listener...");
+      
+      // Immediately check current session on initialization
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          console.log("Found existing session for user:", session.user.id);
+          get().setUserAndProfile(session.user);
+        } else {
+          console.log("No existing session found");
+        }
+      });
+      
       const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
         console.log("Auth state changed:", event, session?.user?.id);
-        const currentUser = session?.user ?? null;
-        // Call setUserAndProfile whenever auth state changes
-        await get().setUserAndProfile(currentUser); 
+        
+        // Force revalidation on auth events
+        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+          const currentUser = session?.user ?? null;
+          await get().setUserAndProfile(currentUser);
+        }
       });
 
       // Return the unsubscribe function

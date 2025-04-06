@@ -36,19 +36,10 @@ export default function HomePage() {
   // State for detail dialog
   const [selectedLocationDetail, setSelectedLocationDetail] = useState<LocationData | null>(null);
 
-  // Get state from store
+  // Get state from store - auth state is now managed centrally
   const selectedCategory = useAppStore((state) => state.selectedCategory);
   const attendedEventIds = useAppStore((state) => state.attendedEventIds);
-
-  // Auth listener is now initialized globally in RootLayout via StoreInitializer
-  // useEffect(() => {
-  //   const unsubscribe = useAppStore.getState().initializeAuthListener();
-  //
-  //   // Cleanup listener on component unmount
-  //   return () => {
-  //     unsubscribe();
-  //   };
-  // }, []);
+  const user = useAppStore((state) => state.user);
 
   // Filter locations for the LIST view (only by category)
   const locationsForList = useMemo(() => {

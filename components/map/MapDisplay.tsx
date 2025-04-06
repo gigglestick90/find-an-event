@@ -48,8 +48,9 @@ export default function MapDisplay({ locations }: MapDisplayProps) {
         <MapContainer
             center={pittsburghCoords}
             zoom={12}
-            style={{ height: '100%', width: '100%' }} // Ensure container has dimensions
+            style={{ height: '100%', width: '100%', zIndex: 1 }} // Add lower z-index to ensure sidebar appears above
             scrollWheelZoom={true} // Enable scroll wheel zoom
+            className="leaflet-container" // Add class for potential CSS targeting
         >
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

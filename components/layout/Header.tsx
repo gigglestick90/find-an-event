@@ -1,11 +1,12 @@
 // components/layout/Header.tsx
 "use client"; // Needed for client-side interaction like linking, forms, and state hooks
-import React, { useState, useEffect } from 'react'; // Need state and effect
+import React from 'react'; // Remove unused imports
 import { Button } from "@/components/ui/button";
 import { type User } from '@supabase/supabase-js'; // Keep User type
 import { createClient } from '@/utils/supabase/client'; // Need client-side Supabase client
 import Link from 'next/link';
 import { signout } from '@/app/auth/signout/actions'; // Keep signout action
+import { useAppStore } from '@/lib/store'; // Add store import
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"; // Keep Sheet components
 import { MenuIcon, MapPinIcon } from 'lucide-react'; // Keep icons
 import Sidebar from './Sidebar'; // Keep Sidebar import
@@ -15,43 +16,16 @@ interface HeaderProps {
   user: User | null;
 }
 
-export default function Header({ user: initialUser }: HeaderProps) { // Accept prop
-  // Local state for user, initialized by the prop passed from layout
-  const [user, setUser] = useState<User | null>(initialUser);
-
-  useEffect(() => {
-    // Initialize Supabase client on the client-side
-    const supabase = createClient();
-
-    // Listen for changes to authentication state
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        const currentUser = session?.user ?? null;
-        // Update local user state on SIGNED_IN, SIGNED_OUT,
-        // or INITIAL_SESSION *if* a user exists in the session.
-        if (event === 'SIGNED_IN') {
-          console.log("Header detected SIGNED_IN, setting user:", currentUser?.id);
-          setUser(currentUser);
-        } else if (event === 'SIGNED_OUT') {
-          console.log("Header detected SIGNED_OUT, setting user to null");
-          setUser(null);
-        } else if (event === 'INITIAL_SESSION' && currentUser) {
-          // Handle case where initial session check finds a user
-          // (might happen after redirect/cookie propagation)
-          console.log("Header detected INITIAL_SESSION with user, setting user:", currentUser?.id);
-          setUser(currentUser);
-        } else {
-          // Optionally log other events like USER_UPDATED, PASSWORD_RECOVERY etc.
-           console.log("Header received other auth event:", event, currentUser?.id);
-        }
-      }
-    );
-
-    // Cleanup subscription on component unmount
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, []); // Empty dependency array ensures this runs once on mount
+export default function Header({ user }: HeaderProps) {
+  // Use the user prop directly from the store, which is now kept in sync
+  // No need for local state or auth listener as it's handled by StoreInitializer
+  
+  // Get user from store to ensure it's always up-to-date
+  const storeUser = useAppStore(state => state.user);
+  
+  // Use the store user if available, otherwise fall back to the prop
+  // This ensures we have the most up-to-date user state
+  const currentUser = storeUser || user;
 
   // The rest of the component uses the local 'user' state
   return (
@@ -68,10 +42,10 @@ export default function Header({ user: initialUser }: HeaderProps) { // Accept p
                 <span className="sr-only">Toggle Sidebar</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-72">
+            <SheetContent side="left" className="p-0 w-72 z-[100]">
               {/* Render Sidebar content inside the sheet - Pass user prop */}
               {/* Pass the local user state to the Sidebar */}
-              <Sidebar user={user} />
+              <Sidebar user={currentUser} />
             </SheetContent>
           </Sheet>
         </div>
@@ -87,10 +61,10 @@ export default function Header({ user: initialUser }: HeaderProps) { // Accept p
 
         {/* Auth Section - Use ml-auto to push to the right */}
         <div className="ml-auto flex items-center space-x-2"> {/* This ml-auto should push this div right */}
-          {user ? (
+          {currentUser ? (
             <>
-              <span className="text-sm font-medium hidden sm:inline" title={user.email ?? 'User'}>
-                {user.email}
+              <span className="text-sm font-medium hidden sm:inline" title={currentUser.email ?? 'User'}>
+                {currentUser.email}
               </span>
               {/* Logout Button using a form */}
               <form action={signout}>
