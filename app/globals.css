@@ -125,23 +125,8 @@
 .leaflet-container {
   z-index: 1 !important; /* Override Leaflet's default z-index */
 }
+
 /* Ensure Sheet content appears above the map */
 .sheet-content {
   z-index: 100 !important;
-}
-
-@layer utilities {
-  /* Ensure card buttons are always clickable */
-  .card-footer-buttons {
-    pointer-events: auto !important;
-    position: relative;
-    z-index: 20;
-  }
-
-  /* Make card buttons more prominent on hover */
-  .card-footer-buttons button:hover,
-  .card-footer-buttons a:hover {
-    z-index: 30 !important;
-    transform: scale(1.05);
-  }
 }
