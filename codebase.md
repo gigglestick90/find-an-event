@@ -45,6 +45,10 @@ Styling is primarily handled using Tailwind CSS.
     </div>
     ```
 
+### 2.4. Analytics
+*   **Speed Insights (`@vercel/speed-insights/next`):** Speed Insights gathered from Vercel in layout.tsx. Speed Insights added before closing body.
+*   **Analytics (`@vercel/analytics/next`):** Analytics gathered from Vercel in layout.tsx. Analytics added before closing body.
+
 ## 3. File Structure Conventions
 
 Adhere to the following structure for consistency:
