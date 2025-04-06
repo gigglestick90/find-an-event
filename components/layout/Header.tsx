@@ -10,6 +10,7 @@ import { useAppStore } from '@/lib/store'; // Add store import
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"; // Keep Sheet components
 import { MenuIcon, MapPinIcon } from 'lucide-react'; // Keep icons
 import Sidebar from './Sidebar'; // Keep Sidebar import
+import { createClient } from '@/utils/supabase/client'; // Import client-side Supabase client
 
 // Define props for the Header, accepting the initial user state
 interface HeaderProps {
@@ -66,12 +67,21 @@ export default function Header({ user }: HeaderProps) {
               <span className="text-sm font-medium hidden sm:inline" title={currentUser.email ?? 'User'}>
                 {currentUser.email}
               </span>
-              {/* Logout Button using a form */}
-              <form action={signout}>
-                <Button type="submit" variant="outline" size="sm" className="transition-colors hover:bg-destructive/10 hover:text-destructive">
-                  Logout
-                </Button>
-              </form>
+              {/* Logout Button with client-side handler */}
+              <Button
+                onClick={async () => {
+                  // First, clear the user in the client-side store
+                  useAppStore.setState({ user: null, attendedEventIds: [] });
+                  
+                  // Then call the server action to complete the logout
+                  await signout();
+                }}
+                variant="outline"
+                size="sm"
+                className="transition-colors hover:bg-destructive/10 hover:text-destructive"
+              >
+                Logout
+              </Button>
             </>
           ) : (
             // Standard asChild pattern for Button with Link
