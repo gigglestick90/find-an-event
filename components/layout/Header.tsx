@@ -10,7 +10,6 @@ import { useAppStore } from '@/lib/store'; // Add store import
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"; // Keep Sheet components
 import { MenuIcon, MapPinIcon } from 'lucide-react'; // Keep icons
 import Sidebar from './Sidebar'; // Keep Sidebar import
-import { createClient } from '@/utils/supabase/client'; // Import client-side Supabase client
 
 // Define props for the Header, accepting the initial user state
 interface HeaderProps {
