@@ -1,15 +1,17 @@
 // components/layout/Header.tsx
 "use client"; // Needed for client-side interaction like linking, forms, and state hooks
-import React from 'react'; // Remove unused imports
+import React from 'react';
 import { Button } from "@/components/ui/button";
-import { type User } from '@supabase/supabase-js'; // Keep User type
-// Remove unused createClient import as auth is now handled by the store
+import { type User } from '@supabase/supabase-js';
 import Link from 'next/link';
-import { signout } from '@/app/auth/signout/actions'; // Keep signout action
-import { useAppStore } from '@/lib/store'; // Add store import
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"; // Keep Sheet components
-import { MenuIcon, MapPinIcon } from 'lucide-react'; // Keep icons
-import Sidebar from './Sidebar'; // Keep Sidebar import
+import { signout } from '@/app/auth/signout/actions';
+import { useAppStore } from '@/lib/store';
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { MenuIcon, MapPinIcon } from 'lucide-react';
+import Sidebar from './Sidebar';
+import { allLocations, Region } from '@/data/locations'; // Import Region and locations
+import { cn } from "@/lib/utils"; // Import cn utility
+// We won't import RegionFilter component, but reuse its logic for desktop
 
 // Define props for the Header, accepting the initial user state
 interface HeaderProps {
@@ -20,12 +22,23 @@ export default function Header({ user }: HeaderProps) {
   // Use the user prop directly from the store, which is now kept in sync
   // No need for local state or auth listener as it's handled by StoreInitializer
   
-  // Get user from store to ensure it's always up-to-date
+  // Get state and actions from store
   const storeUser = useAppStore(state => state.user);
-  
-  // Use the store user if available, otherwise fall back to the prop
-  // This ensures we have the most up-to-date user state
+  const selectedRegion = useAppStore((state) => state.selectedRegion);
+  const setSelectedRegion = useAppStore((state) => state.setSelectedRegion);
+
+  // Determine current user
   const currentUser = storeUser || user;
+
+  // Define the specific order for regions
+  const regions: (Region | 'All')[] = [
+    'All',
+    'City of Pittsburgh',
+    'East Suburbs / East',
+    'North Hills / North',
+    'South Hills / South',
+    'Airport Area / West'
+  ]; // Removed trailing comma and dependency array
 
   // The rest of the component uses the local 'user' state
   return (
@@ -50,17 +63,45 @@ export default function Header({ user }: HeaderProps) {
           </Sheet>
         </div>
 
-        {/* App Title/Logo - Add Pittsburgh emphasis */}
-        <div className="flex items-center"> {/* Title container */}
-          <Link href="/" className="flex items-center space-x-2">
-            <MapPinIcon className="h-5 w-5 text-primary hidden sm:inline" /> {/* Added icon */}
+        {/* App Title & Region Filter (Desktop) */}
+        <div className="hidden md:flex items-center space-x-2 flex-grow"> {/* Use flex-grow to push auth right */}
+          <Link href="/" className="flex items-center space-x-2 flex-shrink-0"> {/* Title part */}
+            <MapPinIcon className="h-5 w-5 text-primary" />
             <span className="font-bold text-lg">Find an Event</span>
-            <span className="text-muted-foreground text-lg hidden sm:inline">| Pittsburgh</span>
+          </Link>
+          {/* Desktop Region Filter Buttons */}
+          <div className="flex items-center justify-center flex-wrap gap-x-1 ml-4"> {/* Filter buttons part */}
+            {regions.map((region, index) => (
+              <React.Fragment key={region}>
+                <Button
+                  variant={selectedRegion === region ? "secondary" : "ghost"} // Use secondary for selected
+                  size="sm"
+                  className={cn(
+                    "h-8 px-2 rounded-md transition-colors text-sm", // Smaller padding, text size
+                    selectedRegion !== region && "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  )}
+                  onClick={() => setSelectedRegion(region)}
+                >
+                  {region}
+                </Button>
+                {index < regions.length - 1 && (
+                  <span className="text-muted-foreground mx-1">|</span>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
+        {/* Mobile App Title (Simpler) */}
+        <div className="flex md:hidden items-center flex-grow"> {/* Title container for mobile */}
+          <Link href="/" className="flex items-center space-x-2">
+            <MapPinIcon className="h-5 w-5 text-primary" />
+            <span className="font-bold text-lg">Find an Event</span>
           </Link>
         </div>
 
         {/* Auth Section - Use ml-auto to push to the right */}
-        <div className="ml-auto flex items-center space-x-2"> {/* This ml-auto should push this div right */}
+        <div className="flex-shrink-0 ml-auto flex items-center space-x-2"> {/* Add flex-shrink-0 here */}
           {currentUser ? (
             <>
               <span className="text-sm font-medium hidden sm:inline" title={currentUser.email ?? 'User'}>

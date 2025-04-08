@@ -9,7 +9,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"; // 
 // Static import removed - will be dynamically imported
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MapIcon, ListIcon } from 'lucide-react';
-import RegionFilter from '@/components/layout/RegionFilter'; // Import the new filter component
+// RegionFilter import removed as it's now integrated into Header
 import {
   Dialog,
   DialogContent,
@@ -111,13 +111,10 @@ export default function HomePage() {
         </ToggleGroup>
       </div>
 
-      {/* Region Filter - Below toggle, above mobile categories */}
-      <div className="p-2 py-3 border-b bg-background/90 backdrop-blur-sm sticky top-[60px] z-10"> {/* Adjust top based on toggle height */}
-        <RegionFilter />
-      </div>
+      {/* Region Filter section removed */}
 
       {/* Mobile Category Filters (Hidden on md and up) - Make sticky below toggle AND region filter */}
-      <div className="p-2 py-3 border-b flex justify-center flex-wrap gap-2 md:hidden bg-background/90 backdrop-blur-sm sticky top-[125px] z-10"> {/* Adjust top based on combined height of toggle and region filter */}
+      <div className="p-2 py-3 border-b flex justify-center flex-wrap gap-2 md:hidden bg-background/90 backdrop-blur-sm sticky top-[60px] z-10"> {/* Adjust top back to original toggle height */}
         {categories.map(category => (
           <Button
             key={category}
