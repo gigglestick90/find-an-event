@@ -52,23 +52,39 @@ const categories: Category[] = ["All", "Restaurant", "Hiking", "Games", "Museum"
           
           {/* Mobile-only Region Filter */}
           {isMobile && (
-            <div className="mb-4">
+            <div className="mb-6 relative">
               <h3 className="text-sm font-medium mb-2 px-2">Filter by Region</h3>
-              <Select
-                value={selectedRegion}
-                onValueChange={(value) => setSelectedRegion(value as Region | 'All')}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select Region" />
-                </SelectTrigger>
-                <SelectContent>
-                  {regions.map(region => (
-                    <SelectItem key={region} value={region}>
-                      {region}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="relative z-50">
+                <Select
+                  defaultValue={selectedRegion}
+                  value={selectedRegion}
+                  onValueChange={(value) => {
+                    // Explicitly cast the value and update only the region
+                    setSelectedRegion(value as Region | 'All');
+                  }}
+                >
+                  <SelectTrigger className="w-full bg-background border-input hover:bg-accent hover:text-accent-foreground">
+                    <SelectValue placeholder="Select Region">
+                      {selectedRegion}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent
+                    position="popper"
+                    className="z-[100] min-w-[200px]"
+                    sideOffset={4}
+                  >
+                    {regions.map(region => (
+                      <SelectItem
+                        key={region}
+                        value={region}
+                        className="cursor-pointer hover:bg-accent"
+                      >
+                        {region}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           )}
           
@@ -77,8 +93,11 @@ const categories: Category[] = ["All", "Restaurant", "Hiking", "Games", "Museum"
               key={category}
               variant={selectedCategory === category ? "secondary" : "ghost"}
               className="w-full justify-start"
-              // Call the store's setter directly with the category
-              onClick={() => setSelectedCategory(category)}
+              // Ensure we only update the category and don't affect the region
+              onClick={() => {
+                // Only update the category, preserving the current region selection
+                setSelectedCategory(category);
+              }}
             >
               {category}
             </Button>

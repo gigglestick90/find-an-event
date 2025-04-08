@@ -33,8 +33,14 @@ export const useAppStore = create<AppState>((set, get) => {
     // --- Filter State ---
     selectedCategory: 'All',
     selectedRegion: 'All', // Initialize region state
-    setSelectedCategory: (category: Category) => set({ selectedCategory: category }),
-    setSelectedRegion: (region: Region | 'All') => set({ selectedRegion: region }), // Implement region action
+    setSelectedCategory: (category: Category) => {
+      console.log('Setting category to:', category);
+      set({ selectedCategory: category });
+    },
+    setSelectedRegion: (region: Region | 'All') => {
+      console.log('Setting region to:', region);
+      set({ selectedRegion: region });
+    }, // Implement region action
 
     // --- Auth & Profile State ---
     user: null, // Initial user state
