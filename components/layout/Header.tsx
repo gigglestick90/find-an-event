@@ -9,7 +9,7 @@ import { useAppStore } from '@/lib/store';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MenuIcon, MapPinIcon } from 'lucide-react';
 import Sidebar from './Sidebar';
-import { allLocations, Region } from '@/data/locations'; // Import Region and locations
+import { Region } from '@/data/locations'; // Import Region type only
 import { cn } from "@/lib/utils"; // Import cn utility
 // We won't import RegionFilter component, but reuse its logic for desktop
 
