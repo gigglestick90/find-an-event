@@ -44,8 +44,8 @@ export default function Header({ user }: HeaderProps) {
   return (
     // Add padding, subtle gradient, and shadow
     <header className="sticky top-0 z-50 w-full border-b bg-gradient-to-b from-background via-background/95 to-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
-      {/* Use max-w-7xl for wider container on large screens, adjust height */}
-      <div className="container flex h-16 items-center max-w-7xl px-4 sm:px-6 lg:px-8">
+      {/* Use max-w-full to extend across the entire width */}
+      <div className="w-full flex h-16 items-center px-4 sm:px-6 lg:px-8">
         {/* Mobile Sidebar Toggle */}
         <div className="md:hidden mr-2">
           <Sheet>
@@ -100,8 +100,8 @@ export default function Header({ user }: HeaderProps) {
           </Link>
         </div>
 
-        {/* Auth Section - Use ml-auto to push to the right */}
-        <div className="flex-shrink-0 ml-auto flex items-center space-x-2"> {/* Add flex-shrink-0 here */}
+        {/* Auth Section - Positioned at the far right edge of the screen */}
+        <div className="flex-shrink-0 flex items-center space-x-2 ml-auto"> {/* Using ml-auto with full-width container */}
           {currentUser ? (
             <>
               <span className="text-sm font-medium hidden sm:inline" title={currentUser.email ?? 'User'}>
