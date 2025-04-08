@@ -3,13 +3,15 @@ import { createClient } from '@/utils/supabase/client'; // Import Supabase clien
 import { type User } from '@supabase/supabase-js'; // Import User type
 
 // Define the categories type plus 'All'
+import { Region } from '@/data/locations'; // Import Region type
 export type Category = 'All' | 'Restaurant' | 'Hiking' | 'Games' | 'Museum' | 'Sports' | 'Shopping' | 'Park' | 'Entertainment';
-
 // Define the combined state structure and actions
 interface AppState {
   // Filter state
   selectedCategory: Category;
+  selectedRegion: Region | 'All'; // Add state for selected region
   setSelectedCategory: (category: Category) => void;
+  setSelectedRegion: (region: Region | 'All') => void; // Add action for region
 
   // Auth & Profile state
   user: User | null; // Store the logged-in Supabase user object
@@ -30,7 +32,9 @@ export const useAppStore = create<AppState>((set, get) => {
   return {
     // --- Filter State ---
     selectedCategory: 'All',
+    selectedRegion: 'All', // Initialize region state
     setSelectedCategory: (category: Category) => set({ selectedCategory: category }),
+    setSelectedRegion: (region: Region | 'All') => set({ selectedRegion: region }), // Implement region action
 
     // --- Auth & Profile State ---
     user: null, // Initial user state

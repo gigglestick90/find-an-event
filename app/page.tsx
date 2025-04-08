@@ -9,6 +9,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"; // 
 // Static import removed - will be dynamically imported
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MapIcon, ListIcon } from 'lucide-react';
+import RegionFilter from '@/components/layout/RegionFilter'; // Import the new filter component
 import {
   Dialog,
   DialogContent,
@@ -43,16 +44,17 @@ export default function HomePage() {
 
   // Get state from store - auth state is now managed centrally
   const selectedCategory = useAppStore((state) => state.selectedCategory);
+  const selectedRegion = useAppStore((state) => state.selectedRegion); // Get selected region
   const attendedEventIds = useAppStore((state) => state.attendedEventIds);
-  // Remove unused user variable since we don't need it in this component
 
-  // Filter locations for the LIST view (only by category)
+  // Filter locations for the LIST view (by category AND region)
   const locationsForList = useMemo(() => {
-    if (selectedCategory === "All") {
-      return allLocations;
-    }
-    return allLocations.filter((loc) => loc.category === selectedCategory);
-  }, [selectedCategory]);
+    return allLocations.filter(location => {
+      const categoryMatch = selectedCategory === 'All' || location.category === selectedCategory;
+      const regionMatch = selectedRegion === 'All' || location.region === selectedRegion;
+      return categoryMatch && regionMatch; // Both must match
+    });
+  }, [selectedCategory, selectedRegion]); // Add selectedRegion dependency
 
   // Filter locations for the MAP view (category AND not attended)
   const locationsForMap = useMemo(() => {
@@ -109,8 +111,13 @@ export default function HomePage() {
         </ToggleGroup>
       </div>
 
-      {/* Mobile Category Filters (Hidden on md and up) - Make sticky below toggle */}
-      <div className="p-2 py-3 border-b flex justify-center flex-wrap gap-2 md:hidden bg-background/90 backdrop-blur-sm sticky top-[60px] z-10"> {/* Adjust top based on toggle height */}
+      {/* Region Filter - Below toggle, above mobile categories */}
+      <div className="p-2 py-3 border-b bg-background/90 backdrop-blur-sm sticky top-[60px] z-10"> {/* Adjust top based on toggle height */}
+        <RegionFilter />
+      </div>
+
+      {/* Mobile Category Filters (Hidden on md and up) - Make sticky below toggle AND region filter */}
+      <div className="p-2 py-3 border-b flex justify-center flex-wrap gap-2 md:hidden bg-background/90 backdrop-blur-sm sticky top-[125px] z-10"> {/* Adjust top based on combined height of toggle and region filter */}
         {categories.map(category => (
           <Button
             key={category}
@@ -149,7 +156,9 @@ export default function HomePage() {
                 ))
               ) : (
                 <p className="col-span-full text-center text-muted-foreground py-10">
-                  No locations found{selectedCategory !== 'All' ? ` for "${selectedCategory}"` : ''}.
+                  No locations found
+                  {selectedCategory !== 'All' ? ` for category "${selectedCategory}"` : ''}
+                  {selectedRegion !== 'All' ? ` in region "${selectedRegion}"` : ''}.
                 </p>
               )}
             </div>
